@@ -11,6 +11,7 @@ import { MemberType } from '../../libs/enums/member.enum';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { MemberUpdate } from '../../libs/dto/member/member.update';
 import { shapeIntoMongoObject } from '../../libs/config';
+import { WithoutGuard } from '../auth/guards/without.guard';
 
 @Resolver()
 export class MemberResolver {
@@ -54,11 +55,12 @@ export class MemberResolver {
 		return `hi ${authMember.memberNick}, you are ${authMember.memberType} (memberID: ${authMember._id})`;
 	}
 
+	@UseGuards(WithoutGuard)
 	@Query(() => Member)
-	async getMember(@Args('memberId') input: string): Promise<Member> {
+	async getMember(@Args('memberId') input: string, @AuthMember('_id') memberId: ObjectId): Promise<Member> {
 		console.log('Query: getMember');
 		const targetId = shapeIntoMongoObject(input);
-		return this.memberService.getMember(targetId);
+		return this.memberService.getMember(memberId, targetId);
 	}
 
 	//* ADMIN
