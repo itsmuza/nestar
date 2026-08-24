@@ -9,6 +9,7 @@ import { ObjectId } from 'bson';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { MemberType } from '../../libs/enums/member.enum';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { MemberUpdate } from '../../libs/dto/member/member.update';
 
 @Resolver()
 export class MemberResolver {
@@ -28,12 +29,11 @@ export class MemberResolver {
 	}
 
 	@UseGuards(AuthGuard)
-	@Mutation(() => String)
-	async updateMember(@AuthMember('_id') memberId: ObjectId): Promise<string> {
+	@Mutation(() => Member)
+	async updateMember(@Args('input') input: MemberUpdate, @AuthMember('_id') memberId: ObjectId): Promise<Member> {
 		console.log('Mutation: updateMember');
-		console.log(typeof memberId);
-		console.log(memberId);
-		return this.memberService.updateMember();
+		delete input._id;
+		return this.memberService.updateMember(memberId, input);
 	}
 
 	@UseGuards(AuthGuard)
@@ -47,10 +47,10 @@ export class MemberResolver {
 	@Roles(MemberType.USER)
 	@UseGuards(RolesGuard)
 	@Query(() => String)
-	async checkAuthRoles(@AuthMember('memberNick') memberNick: string): Promise<string> {
+	async checkAuthRoles(@AuthMember() authMember: Member): Promise<string> {
 		console.log('Query: checkAuthRoles');
-		console.log('memberNick:', memberNick);
-		return 'hi ' + memberNick;
+
+		return `hi ${authMember.memberNick}, you are ${authMember.memberType} (memberID: ${authMember._id})`;
 	}
 
 	@Query(() => String)
