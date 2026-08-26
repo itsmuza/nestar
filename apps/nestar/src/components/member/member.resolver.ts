@@ -93,7 +93,7 @@ export class MemberResolver {
 
 	//& UPLOADER
 	@UseGuards(AuthGuard)
-	@Mutation((returns) => String)
+	@Mutation(() => String)
 	public async imageUploader(
 		@Args({ name: 'file', type: () => GraphQLUpload })
 		{ createReadStream, filename, mimetype }: FileUpload,
@@ -112,7 +112,7 @@ export class MemberResolver {
 		const result = await new Promise((resolve, reject) => {
 			stream
 				.pipe(createWriteStream(url))
-				.on('finish', async () => resolve(true))
+				.on('finish', () => resolve(true))
 				.on('error', () => reject(false));
 		});
 		if (!result) throw new Error(Message.UPLOAD_FAILED);
@@ -121,7 +121,7 @@ export class MemberResolver {
 	}
 
 	@UseGuards(AuthGuard)
-	@Mutation((returns) => [String])
+	@Mutation(() => [String])
 	public async imagesUploader(
 		@Args('files', { type: () => [GraphQLUpload] })
 		files: Promise<FileUpload>[],
@@ -130,7 +130,7 @@ export class MemberResolver {
 		console.log('Mutation: imagesUploader');
 
 		const uploadedImages: string[] = [];
-		const promisedList = files.map(async (img: Promise<FileUpload>, index: number): Promise<Promise<void>> => {
+		const promisedList = files.map(async (img: Promise<FileUpload>, index: number): Promise<void> => {
 			try {
 				const { filename, mimetype, encoding, createReadStream } = await img;
 
