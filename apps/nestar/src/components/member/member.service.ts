@@ -100,7 +100,7 @@ export class MemberService {
 				},
 			])
 			.exec();
-		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
+		if (!result[0].list.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
 		return result[0];
 	}
@@ -132,6 +132,9 @@ export class MemberService {
 		if (!result.length) {
 			throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 		}
+
+		// meLiked
+		// meFollowed
 
 		return result[0];
 	}
