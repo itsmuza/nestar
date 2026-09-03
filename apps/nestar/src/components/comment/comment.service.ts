@@ -11,6 +11,7 @@ import { CommentGroup, CommentStatus } from '../../libs/enums/comment.enum';
 import { Comment, Comments } from '../../libs/dto/comment/comment';
 import { CommentUpdate } from '../../libs/dto/comment/comment.update';
 import { lookupMember } from '../../libs/config';
+import { T } from '../../libs/types/common';
 
 @Injectable()
 export class CommentService {
@@ -101,5 +102,36 @@ export class CommentService {
 		if (!result.length) throw new InternalServerErrorException(Message.NO_DATA_FOUND);
 
 		return result[0];
+	}
+
+	public async removeCommentByAdmin(input: ObjectId): Promise<Comment> {
+		const result = await this.commentModel.findByIdAndDelete(input);
+		if (!result) throw new InternalServerErrorException(Message.REMOVE_FAILED);
+
+		switch (result.commentGroup) {
+			case CommentGroup.PROPERTY:
+				await this.propertyService.propertyStatsEditor({
+					_id: result.commentRefId,
+					targetKey: 'propertyComments',
+					modifier: -1,
+				});
+				break;
+			case CommentGroup.ARTICLE:
+				await this.boardArticleService.boardArticleStatsEditor({
+					_id: result.commentRefId,
+					targetKey: 'articleComments',
+					modifier: -1,
+				});
+				break;
+			case CommentGroup.MEMBER:
+				await this.memberService.memberStatsEditor({
+					_id: result.commentRefId,
+					targetKey: 'memberComments',
+					modifier: -1,
+				});
+				break;
+		}
+
+		return result;
 	}
 }
