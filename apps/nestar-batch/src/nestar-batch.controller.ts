@@ -8,10 +8,10 @@ export class NestarBatchController {
 	private logger: Logger = new Logger('BatchController');
 	constructor(private readonly batchService: NestarBatchService) {}
 
-	// @Timeout(2000)
-	// handleTimeout() {
-	// 	this.logger.debug('Batch server ready');
-	// }
+	@Timeout(1000)
+	handleTimeout() {
+		this.logger.debug('Batch server ready');
+	}
 
 	// @Interval(1000)
 	// handleInterval() {
@@ -24,7 +24,7 @@ export class NestarBatchController {
 	// 	this.logger.debug('EXECUTED');
 	// }
 
-	@Cron('0 * * * * *', { name: BATCH_ROLLBACK })
+	@Cron('0 0 1 * * *', { name: BATCH_ROLLBACK })
 	async batchRollback() {
 		try {
 			this.logger['context'] = BATCH_ROLLBACK;
@@ -35,23 +35,23 @@ export class NestarBatchController {
 		}
 	}
 
-	@Cron('20 * * * * *', { name: BATCH_TOP_PROPERTIES })
+	@Cron('20 0 1 * * *', { name: BATCH_TOP_PROPERTIES })
 	async batchProperties() {
 		try {
 			this.logger['context'] = BATCH_TOP_PROPERTIES;
 			this.logger.debug('Executed');
-			await this.batchService.batchProperties();
+			await this.batchService.batchTopProperties();
 		} catch (err) {
 			this.logger.error(err);
 		}
 	}
 
-	@Cron('40 * * * * *', { name: BATCH_TOP_AGENTS })
+	@Cron('40 0 1 * * *', { name: BATCH_TOP_AGENTS })
 	async batchAgents() {
 		try {
 			this.logger['context'] = BATCH_TOP_AGENTS;
 			this.logger.debug('Executed');
-			await this.batchService.batchAgents();
+			await this.batchService.batchTopAgents();
 		} catch (err) {
 			this.logger.error(err);
 		}
